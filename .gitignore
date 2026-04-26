@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.env
+venv/
+env/
+results.csv
+AI_chat_history.txt
+*.log

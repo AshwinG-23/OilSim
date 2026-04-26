@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimPro — Supply Chain Resilience Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside id="sidebar">
+
+    <div id="sidebar-header">
+      <div class="logo-text">Sim<span>Pro</span></div>
+      <div class="logo-sub">Supply Chain Resilience Simulator</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Scenarios <span id="sc-count" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px"></span></div>
+      <div id="scenario-list"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Strategies</div>
+      <div id="strategy-list"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Duration</div>
+      <div class="slider-wrap">
+        <input type="range" id="dur-slider" min="30" max="365" value="90">
+        <span class="slider-val" id="dur-lbl">90 days</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Replications</div>
+      <div class="slider-wrap">
+        <input type="range" id="rep-slider" min="1" max="200" value="30">
+        <span class="slider-val" id="rep-lbl">30</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <button class="collapse-btn" id="flags-btn" type="button">
+        <span class="sb-label">Feature Flags</span>
+        <span class="chevron" id="chevron">▶</span>
+      </button>
+      <div class="collapse-body" id="flags-body"></div>
+    </div>
+
+    <div id="run-container">
+      <button class="run-btn" id="run-btn" type="button">Run Simulation</button>
+      <div id="run-status"></div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ───────────────────────────────────────────── -->
+  <main id="main">
+
+    <div id="top-bar">
+      <h1 id="page-title">Select a scenario and click Run</h1>
+      <span class="run-meta" id="run-meta"></span>
+    </div>
+
+    <!-- KPI row -->
+    <div id="kpi-row">
+      <div class="kpi" id="kpi-shortage">
+        <div class="kpi-lbl">Best Shortage</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">hours</div>
+      </div>
+      <div class="kpi" id="kpi-dfr">
+        <div class="kpi-lbl">Best Fulfillment</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">demand met</div>
+      </div>
+      <div class="kpi" id="kpi-cost">
+        <div class="kpi-lbl">Lowest $/bbl</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">transport cost</div>
+      </div>
+      <div class="kpi" id="kpi-fleet">
+        <div class="kpi-lbl">Fleet Util</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">avg across strategies</div>
+      </div>
+      <div class="kpi" id="kpi-totalcost">
+        <div class="kpi-lbl">Best Total Cost</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">total spend</div>
+      </div>
+      <div class="kpi" id="kpi-first">
+        <div class="kpi-lbl">First Shortage</div>
+        <div class="kpi-val">—</div>
+        <div class="kpi-sub">earliest event</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div id="charts-grid">
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Shortage Hours</span></div>
+        <div class="chart-area"><canvas id="chart-shortage"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Avg Cost per Barrel ($/bbl)</span></div>
+        <div class="chart-area"><canvas id="chart-cost"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Demand Fulfillment Rate</span></div>
+        <div class="chart-area"><canvas id="chart-dfr"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Fleet Utilization</span></div>
+        <div class="chart-area"><canvas id="chart-fleet"></canvas></div>
+      </div>
+
+      <div class="card card--wide">
+        <div class="card-hd"><span class="card-title">Inventory Over Time (M bbl)</span></div>
+        <div class="chart-area"><canvas id="chart-inventory"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Source Mix</span>
+          <select class="src-sel hidden" id="src-sel"></select>
+        </div>
+        <div class="chart-area"><canvas id="chart-source"></canvas></div>
+      </div>
+
+    </div>
+
+    <!-- Table -->
+    <div id="table-section">
+      <div class="tbl-title">Strategy Comparison</div>
+      <div class="tbl-wrap">
+        <table id="cmp-table">
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Shortage (h) ↓</th>
+              <th>Std Dev</th>
+              <th>Total Cost ($B)</th>
+              <th>$/bbl ↓</th>
+              <th>Fulfillment % ↑</th>
+              <th>Fleet Util %</th>
+              <th>First Shortage</th>
+            </tr>
+          </thead>
+          <tbody id="cmp-body">
+            <tr><td colspan="8" class="tbl-empty">Run a simulation to see results</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
