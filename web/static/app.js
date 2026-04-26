@@ -27,7 +27,7 @@ Chart.defaults.color       = '#99a0ae';
 // ── State ─────────────────────────────────────────────────────────────────────
 const S = {
   meta:          null,
-  scenarios:     ['short_conflict'],   // array — supports multi-select
+  scenario:      'short_conflict',
   strategies:    ['cost_focused', 'resilient'],
   days:          90,
   reps:          30,
@@ -181,24 +181,15 @@ function initCharts() {
 function renderSidebar() {
   const {meta} = S;
 
-  // Scenarios — checkboxes (multi-select)
+  // Scenarios — radio buttons (single select)
   const sl = $('scenario-list');
-  const updateScCount = () => {
-    const el = $('sc-count');
-    if (el) el.textContent = S.scenarios.length > 1 ? `(${S.scenarios.length} combined)` : '';
-  };
   meta.scenarios.forEach(name => {
     const lbl = document.createElement('label');
     lbl.className='opt';
-    lbl.innerHTML=`<input type="checkbox" value="${name}" ${S.scenarios.includes(name)?'checked':''}><span>${fmt(name)}</span>`;
-    lbl.querySelector('input').addEventListener('change', e => {
-      if (e.target.checked) { if (!S.scenarios.includes(name)) S.scenarios.push(name); }
-      else S.scenarios = S.scenarios.filter(s => s !== name);
-      updateScCount();
-    });
+    lbl.innerHTML=`<input type="radio" name="scenario" value="${name}" ${name===S.scenario?'checked':''}><span>${fmt(name)}</span>`;
+    lbl.querySelector('input').addEventListener('change', () => { S.scenario = name; });
     sl.appendChild(lbl);
   });
-  updateScCount();
 
   // Strategies
   const stl = $('strategy-list');
@@ -280,7 +271,7 @@ function attachListeners() {
 
 // ── Run ───────────────────────────────────────────────────────────────────────
 async function run() {
-  if (!S.scenarios.length) return setStatus('Select at least one scenario.','err');
+  if (!S.scenario) return setStatus('Select a scenario.','err');
   if (!S.strategies.length) return setStatus('Select at least one strategy.','err');
 
   setLoading(true);
@@ -289,7 +280,7 @@ async function run() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        scenarios:[...S.scenarios], strategies:[...S.strategies],
+        scenario:S.scenario, strategies:[...S.strategies],
         duration_days:S.days, replications:S.reps,
         feature_flags:{...S.flags},
       }),
@@ -326,7 +317,7 @@ function render(d) {
   const kArr=strats.map(s=>d.strategies[s].kpis);
 
   // Title
-  const scLabel = (d.scenarios||[d.scenario]).map(fmt).join(' + ');
+  const scLabel = d.scenarios ? d.scenarios.map(fmt).join(' + ') : fmt(d.scenario||'');
   $('page-title').textContent=`${scLabel} — ${strats.map(fmtS).join(' · ')}`;
   $('run-meta').textContent=`${d.duration_days} days · ${d.replications} rep${d.replications!==1?'s':''}`;
 

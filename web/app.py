@@ -64,7 +64,7 @@ def meta():
 def run_simulation():
     body = request.get_json(force=True)
 
-    # Accept both 'scenarios' (array) and legacy 'scenario' (string)
+    # Accept single 'scenario' string (primary) or 'scenarios' array (future use)
     raw = body.get('scenarios') or [body.get('scenario', '')]
     scenario_names = [s for s in raw if s]
 
@@ -75,10 +75,10 @@ def run_simulation():
 
     # Validation
     if not scenario_names:
-        return jsonify({'error': 'Select at least one scenario'}), 400
+        return jsonify({'error': 'Select a scenario'}), 400
     invalid_sc = [s for s in scenario_names if s not in SCENARIOS]
     if invalid_sc:
-        return jsonify({'error': f'Unknown scenarios: {invalid_sc}'}), 400
+        return jsonify({'error': f'Unknown scenario: {invalid_sc}'}), 400
     invalid_st = [s for s in strategies if s not in STRATEGIES]
     if invalid_st:
         return jsonify({'error': f'Unknown strategies: {invalid_st}'}), 400
@@ -139,6 +139,7 @@ def run_simulation():
         }
 
     return jsonify({
+        'scenario':      scenario_names[0] if len(scenario_names) == 1 else '+'.join(scenario_names),
         'scenarios':     scenario_names,
         'duration_days': duration_days,
         'replications':  replications,
