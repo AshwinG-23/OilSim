@@ -27,7 +27,7 @@ The codebase is [available on GitHub](https://github.com/AshwinG-23/OilSim). A w
 
 ## 2. AI Tool Disclosure
 
-Clade Code was used for majority fo the coding part. A detailed plan was made first by my ideas and shared for it to implement. Almost all fo teh dashbaord was built by it with my feedback. The simpy engine needed a lot of bug fixing and some were handled by me. A detailed log can be found at https://github.com/AshwinG-23/OilSim/blob/main/conversation_history.txt.
+Clade Code was used for majority fo the coding part. A detailed plan was made first by my ideas and shared for it to implement. Almost all fo the dashbaord was built by it with my feedback. The simpy engine needed a lot of bug fixing and some were handled by me. A detailed log can be found at https://github.com/AshwinG-23/OilSim/blob/main/conversation_history.txt.
 
 ---
 
