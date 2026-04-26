@@ -4,12 +4,33 @@ A **Discrete-Event Simulation (DES)** engine built with SimPy that models India'
 
 ---
 
-## Quick Start
+## Setup & Run
+
+**Requirements:** Python 3.9+
 
 ```bash
-pip install simpy pytest
-python main.py          # full experiment matrix (200 days × 10 scenarios × 4 strategies × 5 reps)
-python -m pytest tests/ -v   # 97 unit + integration tests
+# 1. Clone the repo
+git clone https://github.com/AshwinG-23/OilSim.git
+cd OilSim
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Start the web dashboard
+python web/app.py
+# → Open http://localhost:5000 in your browser
+```
+
+That's it. The dashboard lets you pick a scenario, strategies, duration, and replications, then run the simulation and view results interactively.
+
+**Optional — run the full experiment matrix from the command line:**
+```bash
+python main.py
+```
+
+**Optional — run the test suite:**
+```bash
+python -m pytest tests/ -v
 ```
 
 ---

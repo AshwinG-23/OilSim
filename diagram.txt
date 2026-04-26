@@ -1,0 +1,39 @@
+flowchart TD
+    subgraph SOURCES["Supply Sources"]
+        G["Gulf\nSaudi / UAE / Iraq\n$2.00/bbl · 12-day transit\n30-40% of imports"]
+        R["Russia\nUrals via Suez\n$3.00/bbl · 30-day transit\n35-40% of imports"]
+        A["West Africa\nNigeria / Angola\n$5.00/bbl · 22-day transit\n10-15% of imports"]
+        P["UAE ADCOP Pipeline\nOverland bypass\n$4.00/bbl · 12-day\nFeature flag only"]
+    end
+
+    subgraph CHOKEPOINTS["Maritime Chokepoints"]
+        H["Strait of Hormuz\nCapacity: 10 ships\nBase transit: 2 days"]
+        S["Red Sea / Suez Canal\nCapacity: 8 ships\nBase transit: 4 days"]
+        C["Cape of Good Hope\nOpen ocean\nNo capacity limit"]
+        BP["No Chokepoint\nDirect pipeline\nBypasses Hormuz"]
+    end
+
+    subgraph INDIA["India - Demand Side"]
+        T["India Terminals\nCommercial Storage\nDemand: 4.2M bbl/day\nCapacity: 100M bbl\nReorder point: 25M bbl"]
+        SPR["Strategic Petroleum Reserve\n40M bbl capacity\n64% filled\nRelease rate: 0.8M bbl/day"]
+    end
+
+    G --> H
+    R --> S
+    A --> C
+    P --> BP
+
+    H --> T
+    S --> T
+    C --> T
+    BP --> T
+
+    T -- "inventory critically low" --> SPR
+    SPR -- "emergency release" --> T
+
+    style H fill:#ff9999,stroke:#cc0000,color:#000000
+    style S fill:#ff9999,stroke:#cc0000,color:#000000
+    style C fill:#99cc99,stroke:#006600,color:#000000
+    style BP fill:#99cc99,stroke:#006600,color:#000000
+    style T fill:#cce5ff,stroke:#0066cc,color:#000000
+    style SPR fill:#ffe0b2,stroke:#e65100,color:#000000
