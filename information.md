@@ -1,7 +1,3 @@
-Below is a calibrated‑style answer to your 20 questions, with approximate ranges and supporting sources. I give each number as an order‑of‑magnitude input, flagging where there is more uncertainty.
-
-***
-
 ### **Fleet**
 
 1. **Number of tankers India uses for crude imports at any given time**  

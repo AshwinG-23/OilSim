@@ -1,7 +1,9 @@
 # OilSim: Oil Supply Chain Resilience Simulator
 
-**Course:** CS572 — Simulation and Modelling  
+**Course:** CS572 — Simulation and Modelling
+**Live link:** [Click Here](http://34.121.56.100/)
 **Repository:** [github.com/AshwinG-23/OilSim](https://github.com/AshwinG-23/OilSim)
+**Info for detailed Rules:** [ReadME](https://github.com/AshwinG-23/OilSim/blob/main/README.md), [Senarios and Features Explanation](https://github.com/AshwinG-23/OilSim/blob/main/info.md), [Real world data sources](https://github.com/AshwinG-23/OilSim/blob/main/information.md)
 
 ---
 
@@ -22,6 +24,10 @@ The core research question is: **Does the sourcing strategy India uses matter, a
 The simulator is built using [SimPy](https://simpy.readthedocs.io/en/latest/), a Python library for process-based discrete-event simulation. The entire physical system — tanker voyages, port inventory, chokepoint congestion, strategic reserves — is modelled as concurrent SimPy processes. Time advances in simulation hours; events such as a tanker completing a voyage or a chokepoint being disrupted are queued and processed in order.
 
 The codebase is [available on GitHub](https://github.com/AshwinG-23/OilSim). A web-based dashboard ([`web/app.py`](https://github.com/AshwinG-23/OilSim/blob/main/web/app.py)) serves a live UI where scenarios can be configured and run interactively with Chart.js visualisations.
+
+### System Diagram
+
+![OilSim system diagram](diagram.png)
 
 ---
 
