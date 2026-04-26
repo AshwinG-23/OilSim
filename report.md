@@ -1,9 +1,9 @@
 # OilSim: Oil Supply Chain Resilience Simulator
 
-**Course:** CS572 — Simulation and Modelling
-**Live link:** [Click Here](http://34.121.56.100/)
-**Repository:** [github.com/AshwinG-23/OilSim](https://github.com/AshwinG-23/OilSim)
-**Info for detailed Rules:** [ReadME](https://github.com/AshwinG-23/OilSim/blob/main/README.md), [Senarios and Features Explanation](https://github.com/AshwinG-23/OilSim/blob/main/info.md), [Real world data sources](https://github.com/AshwinG-23/OilSim/blob/main/information.md)
+- **Course:** CS572 - Simulation and Modelling
+- **Live Link:** [http://34.121.56.100/](http://34.121.56.100/)
+- **Repository:** [github.com/AshwinG-23/OilSim](https://github.com/AshwinG-23/OilSim)
+- **Supporting Documents:** [README](https://github.com/AshwinG-23/OilSim/blob/main/README.md), [Scenario and Feature Guide](https://github.com/AshwinG-23/OilSim/blob/main/info.md), [Real-World Data Sources](https://github.com/AshwinG-23/OilSim/blob/main/information.md)
 
 ---
 
@@ -33,7 +33,7 @@ The codebase is [available on GitHub](https://github.com/AshwinG-23/OilSim). A w
 
 ## 2. AI Tool Disclosure
 
-Clade Code was used for majority fo the coding part. A detailed plan was made first by my ideas and shared for it to implement. Almost all fo the dashbaord was built by it with my feedback. The simpy engine needed a lot of bug fixing and some were handled by me. A detailed log can be found at https://github.com/AshwinG-23/OilSim/blob/main/conversation_history.txt.
+Claude Code was used for a large share of the implementation work. I first created the project plan and design direction, then used Claude Code to help implement the simulator and the dashboard. Most of the dashboard was built with AI assistance and then refined through my feedback. The SimPy engine required several debugging passes, some of which I handled manually. A detailed interaction log is available at [conversation_history.txt](https://github.com/AshwinG-23/OilSim/blob/main/conversation_history.txt).
 
 ---
 
@@ -55,7 +55,7 @@ The ordering loop runs every 24 simulation hours. If inventory is below the reor
 
 ### 3.2 Simulation Parameters
 
-All parameters are calibrated to real-world data (see [Section 5 — References](#6-references) for sources).
+All parameters are calibrated to real-world data (see [Section 6 - References](#6-references) for sources).
 
 | Parameter | Value | Basis |
 |---|---|---|
@@ -127,9 +127,9 @@ Ten scenarios are defined in [`config/params.py`](https://github.com/AshwinG-23/
 | `long_war` | Hormuz at 5% + Red Sea at 10% + 15 tankers lost |
 | `all_out_war` | Hormuz 2% + Red Sea 2% + Russia sanctioned + 65 tankers lost |
 | `cape_disruption` | Africa route closed + Hormuz 15% + Red Sea 20% |
-| `houthi_red_sea` | Red Sea at 40% for 60 days (modelled on 2024 Houthi attacks) |
-| `russia_sanctions` | Russia supply shut down for 100 days |
-| `tanker_strike` | 25 tankers permanently destroyed on day 10 |
+| `houthi_red_sea` | Red Sea at 5% from day 0 for the full simulation |
+| `russia_sanctions` | Russia supply shuts down from day 60 onward |
+| `tanker_strike` | Hormuz at 30% for 60 days + 25 tankers lost on day 30 |
 | `stochastic_conflict` | Random disruptions drawn from a Poisson process |
 
 ### 3.6 Feature Flags
@@ -248,9 +248,7 @@ Adaptive eliminates shortage while costing $0.72B less per 100-day period than r
 
 | Team Member | Contribution |
 |---|---|
-| | |
-| | |
-| | |
+| Ashwin Gaikwad | Project design, simulation logic, debugging, evaluation, report writing, and deployment |
 
 ---
 
