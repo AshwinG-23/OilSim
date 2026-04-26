@@ -13,7 +13,7 @@
 ## File Structure
 
 ```
-simPro/
+OilSim/
 ├── config/
 │   └── params.py          # All simulation constants, source configs, scenario definitions
 ├── core/
@@ -104,7 +104,7 @@ def test_critical_below_reorder():
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /home/ashwin/CS572/simPro
+cd /home/ashwin/CS572/OilSim
 python -m pytest tests/test_params.py -v
 ```
 Expected: ModuleNotFoundError — config.params not found.

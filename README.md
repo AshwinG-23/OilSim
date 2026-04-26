@@ -1,6 +1,6 @@
 # Hormuz Supply Chain Resilience Simulator
 
-A **Discrete-Event Simulation (DES)** engine built with SimPy that models India's crude oil import supply chain under geopolitical disruptions. Evaluates four sourcing strategies across eight disruption scenarios over a configurable time horizon.
+A **Discrete-Event Simulation (DES)** engine built with SimPy that models India's crude oil import supply chain under geopolitical disruptions. Evaluates four sourcing strategies across ten disruption scenarios over a configurable time horizon.
 
 ---
 
@@ -8,7 +8,7 @@ A **Discrete-Event Simulation (DES)** engine built with SimPy that models India'
 
 ```bash
 pip install simpy pytest
-python main.py          # full experiment matrix (200 days × 8 scenarios × 4 strategies × 5 reps)
+python main.py          # full experiment matrix (200 days × 10 scenarios × 4 strategies × 5 reps)
 python -m pytest tests/ -v   # 97 unit + integration tests
 ```
 
@@ -53,7 +53,7 @@ India imports ~4.2 million barrels of crude oil per day (import dependence ~85�
 ## Architecture
 
 ```
-simPro/
+OilSim/
 ├── config/params.py        ← All constants, source configs, 8 scenarios
 ├── core/
 │   ├── chokepoint.py       ← SimPy Resource + disruption severity + congestion + seasonal weather
@@ -247,16 +247,18 @@ The simulation has stochastic (random) elements — tanker breakdown timing, sto
 | `no_disruption` | Normal operations | — | — |
 | `short_conflict` | Hormuz at 50% capacity | Days 30–60 | status=0.5 |
 | `medium_blockade` | Hormuz at 20% capacity | Days 30–120 | status=0.2 |
-| `long_war` | Hormuz at 10% + Red Sea at 50% | Days 30–180 / Days 45–165 | 0.1 / 0.5 |
+| `long_war` | Hormuz at 5% + Red Sea at 10% + 15 tankers lost day 30 | Days 15–190 / Days 25–180 | 0.05 / 0.10 |
+| `all_out_war` | Hormuz 2% + Red Sea 2% + Russia sanctioned + 65 tankers lost | From day 7/10 | 0.02 / 0.02 |
+| `cape_disruption` | Africa route closed + Hormuz 15% + Red Sea 20% | Days 0–200 | 0.15 / 0.20 |
 
-### Realistic New Scenarios
+### Regional / Event-Driven Scenarios
 
 | Scenario | What Happens | Key Feature |
 |---|---|---|
-| `houthi_red_sea` | Red Sea near-closed for 200 days (status=0.05) | Based on 2024 Houthi attacks; forces all Russia oil via Cape |
-| `russia_sanctions` | Russia source shut down by secondary sanctions at day 60 | Source shutdown mechanism; tests Gulf + Africa fallback |
-| `tanker_strike` | Hormuz partially blocked + 5 tankers permanently destroyed at day 30 | Fleet shock; combined supply-side and capacity shock |
-| `stochastic_conflict` | Poisson-distributed disruptions across all chokepoints | Randomised severity + duration; enables Monte Carlo analysis |
+| `houthi_red_sea` | Red Sea at 40% capacity for 60 days | Based on 2024 Houthi attacks; isolates Russia route disruption |
+| `russia_sanctions` | Russia source shut down for 100 days | Source shutdown mechanism; tests Gulf + Africa fallback |
+| `tanker_strike` | 25 tankers permanently destroyed on day 10 | Fleet shock; tests throughput resilience under reduced capacity |
+| `stochastic_conflict` | Poisson-distributed random disruptions | Randomised severity + duration; enables Monte Carlo analysis |
 
 **How severity maps to transit time:**
 ```
@@ -520,58 +522,79 @@ Russia surpassed the Gulf as India's top supplier in 2022–23 after Western san
 
 ---
 
-## Sample Results (200-day run, 5 replications)
+## Sample Results (100-day run, 40 replications)
 
-Calibrated results (90-day run, 5 replications, real-world parameters — 120 tankers × 1.5M bbl, 4.2M bbl/day demand):
+Calibrated results (100-day run, 40 replications, no feature flags — 120 tankers × 1.5M bbl, 4.2M bbl/day demand):
 
 ```
-Scenario             Strategy        Shortage(h)    $/bbl    DFR
---------------------------------------------------------------
-no_disruption        cost_focused         0.0       2.00   1.000
-no_disruption        diversified          0.0       3.34   1.000
-no_disruption        resilient            0.0       5.00   1.000
-no_disruption        adaptive             0.0       2.00   1.000
+Scenario             Strategy        Shortage(h)  DFR     $/bbl   Cost($B)
+--------------------------------------------------------------------------
+no_disruption        cost_focused         0.0    1.000    2.00     0.76
+no_disruption        diversified          0.0    1.000    3.32     1.26
+no_disruption        resilient            0.0    1.000    5.00     1.87
+no_disruption        adaptive             0.0    1.000    2.00     0.76
 
-short_conflict       cost_focused         0.0       2.66   1.000
-short_conflict       diversified          0.0       3.54   1.000
-short_conflict       resilient            0.0       5.00   1.000
-short_conflict       adaptive             0.0       2.45   1.000
+short_conflict       cost_focused         0.0    1.000    2.57     0.91
+short_conflict       diversified          0.0    1.000    3.58     1.34
+short_conflict       resilient            0.0    1.000    5.00     1.87
+short_conflict       adaptive             0.0    1.000    2.71     1.03
 
-medium_blockade      cost_focused       278.0       2.59   0.871  ← Hormuz 80% blocked, keeps routing through
-medium_blockade      diversified          0.0       3.91   1.000
-medium_blockade      resilient            0.0       5.00   1.000
-medium_blockade      adaptive           282.6       2.59   0.869  ← slow to switch (one-cycle lag)
+medium_blockade      cost_focused       402.8    0.832    2.63     0.67  ← keeps routing via congested Hormuz
+medium_blockade      diversified          0.0    1.000    3.86     1.44
+medium_blockade      resilient            0.0    1.000    5.00     1.87
+medium_blockade      adaptive             0.0    1.000    3.54     1.34  ← switches to diversified mode
 
-long_war             cost_focused       443.8       2.74   0.795  ← worst: both chokepoints congested
-long_war             diversified         40.2       4.30   0.981
-long_war             resilient            0.0       5.00   1.000  ← best: Africa route immune
-long_war             adaptive             0.0       3.71   1.000  ← switches to resilient mode
+long_war             cost_focused         0.0    1.000    4.58     1.66  ← pivots to Africa once Hormuz<threshold
+long_war             diversified          0.0    1.000    4.76     1.78
+long_war             resilient            0.0    1.000    5.00     1.87
+long_war             adaptive             0.0    1.000    4.66     1.72
 
-houthi_red_sea       cost_focused         0.0       2.00   1.000  ← doesn't use Red Sea route
-houthi_red_sea       diversified        295.2       3.50   0.863  ← uses Russia (Red Sea), gets hit
-houthi_red_sea       resilient            0.0       5.00   1.000
-houthi_red_sea       adaptive             0.0       2.00   1.000  ← detects disruption, avoids Red Sea
+all_out_war          cost_focused       136.0    0.943    5.00     1.42  ← capacity floor: same for all
+all_out_war          diversified        136.0    0.943    5.00     1.42
+all_out_war          resilient          136.0    0.943    5.00     1.42
+all_out_war          adaptive           136.0    0.943    5.00     1.42
+
+cape_disruption      cost_focused      1093.7    0.544    4.55     0.34  ← Africa closed, no safe route
+cape_disruption      diversified        869.6    0.638    5.24     0.68  ← best: uses both disrupted routes
+cape_disruption      resilient         1094.2    0.544    4.55     0.34
+cape_disruption      adaptive          1095.6    0.543    4.55     0.34
+
+houthi_red_sea       cost_focused         0.0    1.000    2.00     0.76  ← Gulf unaffected by Red Sea
+houthi_red_sea       diversified          0.0    1.000    3.50     1.32
+houthi_red_sea       resilient            0.0    1.000    5.00     1.87
+houthi_red_sea       adaptive             0.0    1.000    3.50     1.32
+
+russia_sanctions     cost_focused         0.0    1.000    2.00     0.76  ← Gulf covers full demand
+russia_sanctions     diversified          0.0    1.000    3.38     1.28
+russia_sanctions     resilient            0.0    1.000    5.00     1.87
+russia_sanctions     adaptive             0.0    1.000    2.00     0.76
+
+tanker_strike        cost_focused       428.7    0.821    3.24     0.75  ← fleet shock causes throughput gap
+tanker_strike        diversified          0.0    1.000    3.79     1.44
+tanker_strike        resilient            0.0    1.000    5.00     1.87
+tanker_strike        adaptive             0.0    1.000    3.44     1.27
+
+stochastic_conflict  cost_focused        77.4    0.968    2.51     0.82  ← surprised by random disruptions
+stochastic_conflict  diversified          0.0    1.000    3.70     1.39
+stochastic_conflict  resilient            0.0    1.000    5.00     1.87
+stochastic_conflict  adaptive             0.0    1.000    3.07     1.15  ← best value: pays premium only when disrupted
 ```
 
 **DFR** = Demand Fulfillment Rate (1.0 = zero shortage, 0.5 = 50% of demand unmet)
 
 ### Key Findings
 
-1. **Zero shortages in normal and short-conflict conditions for all strategies** — with a calibrated fleet of 120 tankers there is ample throughput capacity; shortages only emerge when chokepoints genuinely congest the fleet.
+1. **Cost-focused fails under sustained moderate disruptions** — medium_blockade (Hormuz at 20%) causes 402h shortage; tanker_strike (−25 tankers) causes 428h. Both are survivable by every other strategy, revealing that lean single-source routing has no slack.
 
-2. **Cost-focused is fragile to sustained Hormuz blockades** — medium_blockade (Hormuz at 20%) already causes 278h of shortage because the strategy keeps routing ships through the congested strait, tying up the fleet.
+2. **All strategies tie in all-out war** — when 65 tankers are destroyed and every chokepoint is near-closed simultaneously, Africa is the only viable route but has insufficient throughput (55 tankers × 1.5M bbl / 24.5-day trip ≈ 3.4M bbl/day < 4.2M demand). No ordering policy can compensate for a physical capacity floor.
 
-3. **Resilient wins all disruption scenarios except houthi** (where it's tied first) — the Africa Cape route is completely immune to Hormuz and Red Sea congestion. It pays the highest freight but achieves DFR=1.000 across every scenario.
+3. **Cape disruption is the hardest scenario** — closing Africa + disrupting Hormuz + disrupting Red Sea leaves no safe route. Diversified's multi-route round-robin (spreading across both disrupted Gulf and Russia routes) reduces shortage by 20% vs single-route strategies, but DFR remains ~0.55 for everyone.
 
-4. **Houthi red sea reveals a diversified blind spot** — diversified's round-robin includes Russia, which uses the Red Sea. A 200-day near-closure causes 295h shortage, while cost_focused (which sticks to Gulf) and resilient (which uses Africa) are unaffected.
+4. **Adaptive offers the best cost/resilience trade-off** — in calm markets it matches cost_focused ($2.00/bbl); under stress it matches resilient/diversified. Stochastic conflict demonstrates this clearly: $3.07/bbl and zero shortage, vs resilient's $5.00/bbl or cost_focused's 77h shortage.
 
-5. **Adaptive matches or beats all static strategies** — it costs more than cost_focused but far less than resilient in calm periods, while protecting DFR in crises. The only gap is a one-cycle lag (see medium_blockade: adaptive≈cost_focused before it switches modes).
+5. **Resilient is costly but nearly bullet-proof** — DFR = 1.000 in 8 of 10 scenarios (only all_out_war and cape_disruption breach it, and those breach every strategy). It pays $5.00/bbl continuously, including in perfectly calm conditions.
 
-3. **Diversified is never the best** — pays Africa's high cost without getting disruption immunity, and uses Gulf's fast turnaround without getting Gulf's low cost. Dominated from both ends.
-
-4. **The crossover point matters** — between medium blockade and long war, cost_focused shifts from best to worst. The tipping point is when both major chokepoints degrade simultaneously.
-
-5. **Adaptive strategy** performs near-optimally across scenarios by dynamically switching mode, at the cost of a one-cycle lag on sudden disruptions.
+6. **Houthi and Russia sanctions cause zero shortage** — both are single-route disruptions that the fleet absorbs through rerouting. Consistent with observed 2022–24 market outcomes where Gulf + Africa covered the gap.
 
 ---
 

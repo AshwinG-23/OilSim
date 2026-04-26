@@ -85,9 +85,19 @@ class OrderingPolicy:
         if not priority:
             return None
 
-        if self.strategy == 'diversified':
-            # Round-robin to avoid always using the same source
-            source_name = priority[len(self._orders_log) % len(priority)]
+        # Round-robin in diversified mode; adaptive adopts this when threshold=0.7
+        use_round_robin = (
+            self.strategy == 'diversified' or
+            (self.strategy == 'adaptive' and self.disruption_threshold == 0.7)
+        )
+        if use_round_robin:
+            # Only cycle among safe sources so tankers aren't dispatched into closed straits;
+            # fall back to full priority list only when every source is disrupted
+            disrupted_set = set(disrupted_chokepoints)
+            safe_pool = [s for s in priority
+                         if not any(c in disrupted_set for c in self.sources[s]['chokepoints'])]
+            pool = safe_pool if safe_pool else priority
+            source_name = pool[len(self._orders_log) % len(pool)]
         else:
             source_name = priority[0]
 
